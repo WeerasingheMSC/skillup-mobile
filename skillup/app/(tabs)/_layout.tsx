@@ -1,10 +1,13 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
   const { isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -15,9 +18,10 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
           borderTopColor: isDarkMode ? '#374151' : '#E5E7EB',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom : Math.max(insets.bottom, 20),
+          paddingTop: 14,
+          height: Platform.OS === 'ios' ? 80 + insets.bottom : 80 + Math.max(insets.bottom, 20),
+          borderTopWidth: 1,
         },
         headerStyle: {
           backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',

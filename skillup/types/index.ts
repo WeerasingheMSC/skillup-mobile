@@ -30,7 +30,7 @@ export interface RegisterCredentials {
 
 // Course Types
 export interface Course {
-  id: number;
+  id: string | number;
   title: string;
   description: string;
   category: string;
@@ -41,6 +41,10 @@ export interface Course {
   duration: string;
   level: string;
   status: 'Active' | 'Upcoming' | 'Popular';
+  isbn?: string[];
+  publishYear?: number;
+  pageCount?: number;
+  language?: string[];
 }
 
 export interface CoursesState {
@@ -52,7 +56,7 @@ export interface CoursesState {
 
 // Favourites Types
 export interface FavouritesState {
-  favouriteIds: number[];
+  favouriteIds: (string | number)[];
 }
 
 // Theme Types

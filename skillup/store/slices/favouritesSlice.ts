@@ -11,14 +11,14 @@ const initialState: FavouritesState = {
 export const loadFavourites = createAsyncThunk(
   'favourites/loadFavourites',
   async () => {
-    const favourites = await getStorageItem<number[]>(STORAGE_KEYS.FAVOURITES);
+    const favourites = await getStorageItem<(string | number)[]>(STORAGE_KEYS.FAVOURITES);
     return favourites || [];
   }
 );
 
 export const saveFavourites = createAsyncThunk(
   'favourites/saveFavourites',
-  async (favouriteIds: number[]) => {
+  async (favouriteIds: (string | number)[]) => {
     await setStorageItem(STORAGE_KEYS.FAVOURITES, favouriteIds);
     return favouriteIds;
   }
@@ -28,7 +28,7 @@ const favouritesSlice = createSlice({
   name: 'favourites',
   initialState,
   reducers: {
-    toggleFavourite: (state, action: PayloadAction<number>) => {
+    toggleFavourite: (state, action: PayloadAction<string | number>) => {
       const courseId = action.payload;
       const index = state.favouriteIds.indexOf(courseId);
       
@@ -40,10 +40,10 @@ const favouritesSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(loadFavourites.fulfilled, (state, action: PayloadAction<number[]>) => {
+    builder.addCase(loadFavourites.fulfilled, (state, action: PayloadAction<(string | number)[]>) => {
       state.favouriteIds = action.payload;
     });
-    builder.addCase(saveFavourites.fulfilled, (state, action: PayloadAction<number[]>) => {
+    builder.addCase(saveFavourites.fulfilled, (state, action: PayloadAction<(string | number)[]>) => {
       state.favouriteIds = action.payload;
     });
   },

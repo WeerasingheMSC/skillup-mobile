@@ -17,14 +17,14 @@ export default function FavouritesScreen() {
 
   const favouriteCourses = courses.filter((course) => favouriteIds.includes(course.id));
 
-  const handleFavouritePress = (courseId: number) => {
+  const handleFavouritePress = (courseId: string | number) => {
     dispatch(toggleFavourite(courseId));
     const newFavourites = favouriteIds.filter((id) => id !== courseId);
     dispatch(saveFavourites(newFavourites));
   };
 
   const handleCoursePress = (course: Course) => {
-    console.log('Course pressed:', course.title);
+    router.push(`/course/${course.id}`);
   };
 
   return (

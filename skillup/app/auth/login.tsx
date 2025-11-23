@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { login, clearError } from '../../store/slices/authSlice';
 import { Input } from '../../components/ui/Input';
@@ -62,37 +64,45 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <ScrollView
-        className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
-        contentContainerClassName="flex-grow"
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
-        <View className="flex-1 justify-center px-6 py-12">
-          {/* Header */}
-          <View className="mb-8">
-            <Text
-              className={`text-4xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
-            >
-              Welcome Back
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header Section */}
+          <View className="pt-8 pb-6">
+            <View className="w-16 h-16 rounded-2xl bg-blue-600 items-center justify-center mb-6">
+              <Feather name="book-open" size={32} color="white" />
+            </View>
+            <Text className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Welcome Back!
             </Text>
             <Text className={`text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              Sign in to continue learning
+              Sign in to continue your learning journey
             </Text>
           </View>
 
-          {/* Demo Credentials Info */}
-          <View className="mb-6 p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-            <Text className="text-blue-800 dark:text-blue-200 text-sm font-semibold mb-1">
-              Demo Credentials:
+          {/* Demo Credentials Card */}
+          <View className="mb-8 p-4 rounded-xl border" style={{
+            backgroundColor: isDarkMode ? '#1E3A8A20' : '#DBEAFE',
+            borderColor: isDarkMode ? '#1E40AF' : '#93C5FD'
+          }}>
+            <View className="flex-row items-center mb-2">
+              <Feather name="info" size={16} color={isDarkMode ? '#60A5FA' : '#2563EB'} />
+              <Text className={`ml-2 font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                Demo Account
+              </Text>
+            </View>
+            <Text className={`text-sm ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+              Username: <Text className="font-mono font-semibold">emilys</Text>
             </Text>
-            <Text className="text-blue-700 dark:text-blue-300 text-xs">
-              Username: emilys
-            </Text>
-            <Text className="text-blue-700 dark:text-blue-300 text-xs">
-              Password: emilyspass
+            <Text className={`text-sm ${isDarkMode ? 'text-blue-300' : 'text-blue-600'}`}>
+              Password: <Text className="font-mono font-semibold">emilyspass</Text>
             </Text>
           </View>
 
@@ -125,23 +135,28 @@ export default function LoginScreen() {
             disabled={isLoading}
           />
 
-          {/* Register Link */}
-          <View className="flex-row justify-center mt-6">
-            <Text className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
-              Don't have an account?{' '}
-            </Text>
-            <Text
-              className="text-blue-600 font-semibold"
-              onPress={() => {
-                // @ts-ignore - Expo Router typing limitation
-                router.push('/auth/register');
-              }}
-            >
-              Sign Up
-            </Text>
+          {/* Divider */}
+          <View className="flex-row items-center my-6">
+            <View className={`flex-1 h-px ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`} />
+            <Text className={`mx-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>or</Text>
+            <View className={`flex-1 h-px ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`} />
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          {/* Register Link */}
+          <TouchableOpacity
+            onPress={() => {
+              // @ts-ignore - Expo Router typing limitation
+              router.push('/auth/register');
+            }}
+            className={`p-4 rounded-xl border-2 ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}
+          >
+            <Text className={`text-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+              Don't have an account?{' '}
+              <Text className="text-blue-600 font-semibold">Sign Up</Text>
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

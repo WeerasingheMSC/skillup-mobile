@@ -1,13 +1,36 @@
-// API Base URL
+// API Base URLs
 export const API_BASE_URL = 'https://dummyjson.com';
+export const OPENLIBRARY_BASE_URL = 'https://openlibrary.org';
 
 // API Endpoints
 export const API_ENDPOINTS = {
+  // DummyJSON - Authentication
   LOGIN: '/auth/login',
   REGISTER: '/users/add',
-  PRODUCTS: '/products', // Using products as courses
   USER_ME: '/auth/me',
+  
+  // Open Library - Educational Content
+  SEARCH_BOOKS: '/search.json',
+  SUBJECTS: '/subjects',
+  WORKS: '/works',
+  AUTHORS: '/authors',
 };
+
+// Open Library Subjects for Courses
+export const EDUCATION_SUBJECTS = [
+  'programming',
+  'computer_science',
+  'mathematics',
+  'physics',
+  'chemistry',
+  'biology',
+  'business',
+  'history',
+  'philosophy',
+  'art',
+  'music',
+  'languages',
+];
 
 // Storage Keys
 export const STORAGE_KEYS = {

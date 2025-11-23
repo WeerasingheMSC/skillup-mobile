@@ -35,7 +35,7 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const handleFavouritePress = (courseId: number) => {
+  const handleFavouritePress = (courseId: string | number) => {
     dispatch(toggleFavourite(courseId));
     // Save to AsyncStorage
     const newFavourites = favouriteIds.includes(courseId)
@@ -46,8 +46,7 @@ export default function HomeScreen() {
 
   const handleCoursePress = (course: Course) => {
     // Navigate to course details
-    // For now, we'll just show an alert
-    console.log('Course pressed:', course.title);
+    router.push(`/course/${course.id}`);
   };
 
   if (isLoading && !refreshing) {

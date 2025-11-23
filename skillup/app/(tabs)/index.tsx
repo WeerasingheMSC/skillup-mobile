@@ -1,98 +1,138 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { fetchCourses } from '../../store/slices/coursesSlice';
+import { toggleFavourite, saveFavourites } from '../../store/slices/favouritesSlice';
+import { CourseCard } from '../../components/course/CourseCard';
+import { useTheme } from '../../hooks/useTheme';
+import { Feather } from '@expo/vector-icons';
+import { Course } from '../../types';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { isDarkMode } = useTheme();
+  const { user } = useAppSelector((state) => state.auth);
+  const { courses, isLoading, error } = useAppSelector((state) => state.courses);
+  const { favouriteIds } = useAppSelector((state) => state.favourites);
+  const [refreshing, setRefreshing] = useState(false);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    dispatch(fetchCourses());
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await dispatch(fetchCourses());
+    setRefreshing(false);
+  };
+
+  const handleFavouritePress = (courseId: string | number) => {
+    dispatch(toggleFavourite(courseId));
+    // Save to AsyncStorage
+    const newFavourites = favouriteIds.includes(courseId)
+      ? favouriteIds.filter((id) => id !== courseId)
+      : [...favouriteIds, courseId];
+    dispatch(saveFavourites(newFavourites));
+  };
+
+  const handleCoursePress = (course: Course) => {
+    // Navigate to course details
+    router.push(`/course/${course.id}`);
+  };
+
+  if (isLoading && !refreshing) {
+    return (
+      <View
+        className={`flex-1 justify-center items-center ${
+          isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+        }`}
+      >
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className={`mt-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          Loading courses...
+        </Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View
+        className={`flex-1 justify-center items-center px-6 ${
+          isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+        }`}
+      >
+        <Feather name="alert-circle" size={64} color="#EF4444" />
+        <Text className={`text-lg font-semibold mt-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          Oops! Something went wrong
+        </Text>
+        <Text className={`text-center mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={() => dispatch(fetchCourses())}
+          className="mt-6 bg-blue-600 px-6 py-3 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View className={`flex-1 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <FlatList
+        data={courses}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <CourseCard
+            course={item}
+            onPress={() => handleCoursePress(item)}
+            isFavourite={favouriteIds.includes(item.id)}
+            onFavouritePress={() => handleFavouritePress(item.id)}
+          />
+        )}
+        contentContainerStyle={{ padding: 16 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#3B82F6"
+          />
+        }
+        ListHeaderComponent={
+          <View className="mb-6">
+            <Text className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              Welcome back, {user?.firstName}! 👋
+            </Text>
+            <Text className={`text-base mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Continue your learning journey
+            </Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View className="items-center justify-center py-12">
+            <Feather name="book" size={64} color={isDarkMode ? '#9CA3AF' : '#6B7280'} />
+            <Text
+              className={`text-lg font-semibold mt-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+            >
+              No courses available
+            </Text>
+            <Text className={`text-center mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Check back later for new courses
+            </Text>
+          </View>
+        }
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
